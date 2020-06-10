@@ -16,13 +16,16 @@
  * You should have received a copy of the GNU General Public License along with
  * this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+extern crate clap;
 
+use clap::{App, Arg};
 use serde::{Deserialize, Serialize};
 
 mod open5e;
 
 use open5e::monster::Monster;
 use open5e::spells::Spell;
+use open5e::SearchType;
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 struct EndPointResults<T> {
@@ -60,20 +63,61 @@ async fn main() -> Result<(), reqwest::Error> {
 
 #[tokio::main]
 async fn main() -> Result<(), reqwest::Error> {
-    let mut base_url = "https://api.open5e.com/spells/".to_owned();
+    let matches = App::new(env!("CARGO_PKG_NAME"))
+        .version(env!("CARGO_PKG_VERSION"))
+        .author(env!("CARGO_PKG_AUTHORS"))
+        .about(env!("CARGO_PKG_DESCRIPTION"))
+        .arg(
+            Arg::with_name("monster")
+                .short("m")
+                .long("monster")
+                .conflicts_with("spell")
+                .help("Search for a monster by name"),
+        )
+        .arg(
+            Arg::with_name("spell")
+                .short("s")
+                .long("spell")
+                .conflicts_with("monster")
+                .help("Search for a spell by name"),
+        )
+        .arg(
+            Arg::with_name("name")
+                .help("The name of a spell or monster")
+                .required(true),
+        )
+        .get_matches();
 
-    let mut page_num = 1;
-    loop {
-        println!("Pages scanned: {}", page_num);
+    let mut base_url: String = "https://api.open5e.com/".to_owned();
+    let mut search_type = SearchType::Monster;
 
-        let res = reqwest::get(&base_url).await?;
-        let body = res.json::<EndPointResults<Spell>>().await?;
+    if matches.is_present("spell") {
+        search_type = SearchType::Spell;
+        base_url.push_str("spells/");
+    } else {
+        // default to monster
+        base_url.push_str("monster/");
+    }
 
-        if let Some(next_page) = body.next {
-            base_url = next_page;
-            page_num += 1;
-        } else {
-            break;
+    // unwrap safe b/c the name argument is required per above
+    let search_arg = matches
+        .value_of("name")
+        .unwrap()
+        .to_lowercase()
+        .replace(" ", "-");
+
+    base_url.push_str(&search_arg);
+    dbg!(&base_url);
+
+    let res = reqwest::get(&base_url).await?;
+    res.error_for_status_ref()?;
+
+    match search_type {
+        SearchType::Monster => {
+            let json_data = res.json::<Monster>().await?;
+        }
+        SearchType::Spell => {
+            let json_data = res.json::<Spell>().await?;
         }
     }
 
