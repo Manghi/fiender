@@ -21,7 +21,10 @@ extern crate clap;
 use clap::{App, Arg};
 use serde::{Deserialize, Serialize};
 
+mod md;
 mod open5e;
+
+use md::ToMarkdown;
 
 use open5e::monster::Monster;
 use open5e::spells::Spell;
@@ -96,7 +99,7 @@ async fn main() -> Result<(), reqwest::Error> {
         base_url.push_str("spells/");
     } else {
         // default to monster
-        base_url.push_str("monster/");
+        base_url.push_str("monsters/");
     }
 
     // unwrap safe b/c the name argument is required per above
@@ -112,14 +115,16 @@ async fn main() -> Result<(), reqwest::Error> {
     let res = reqwest::get(&base_url).await?;
     res.error_for_status_ref()?;
 
-    match search_type {
+    let json_data = match search_type {
         SearchType::Monster => {
-            let json_data = res.json::<Monster>().await?;
+            res.json::<Monster>().await?.to_md()
         }
         SearchType::Spell => {
-            let json_data = res.json::<Spell>().await?;
+            res.json::<Spell>().await?.to_md()
         }
-    }
+    };
+
+    println!("{}", json_data);
 
     Ok(())
 }

@@ -17,10 +17,16 @@
  * this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-pub mod monster;
-pub mod spells;
+use std::fmt;
 
-pub enum SearchType {
-    Monster,
-    Spell
+pub struct Markdown (pub String);
+
+pub trait ToMarkdown {
+    fn to_md(&self) -> Markdown;
+}
+
+impl fmt::Display for Markdown {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", self.0)
+    }
 }

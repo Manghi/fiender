@@ -18,6 +18,7 @@
  */
 
 use serde::{Deserialize, Serialize};
+use crate::md::{Markdown, ToMarkdown};
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[allow(non_snake_case)]
@@ -43,4 +44,24 @@ pub struct Spell {
     document__slug: String,
     document__title: String,
     document__license_url: String,
+}
+
+impl ToMarkdown for Spell {
+    fn to_md(&self) -> Markdown {
+        Markdown(String::from("
+###Name: {self.name}
+*Level {self.level} {self.archetype}*
+___
+- **Casting Time:** {self.casting_time} action
+- **Range:** {self.range} feet
+- **Components:** {self.components}
+- **Duration:** {self.duration}
+
+{self.desc}
+
+- **School:** {self.school}
+- **Class:** {self.dnd_class}
+- **Archetype:** {self.archetype}
+"))
+    }
 }

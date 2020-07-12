@@ -22,6 +22,7 @@ use serde::{
     Deserialize, Deserializer, Serialize,
 };
 
+use crate::md::{Markdown, ToMarkdown};
 use std::fmt;
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -61,6 +62,29 @@ struct Action {
     attack_bonus: Option<isize>,
     damage_dice: Option<String>,
     damage_bonus: Option<isize>,
+}
+
+impl fmt::Display for Action {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        if self.name != "" {
+            let mut s = String::new();
+            s.push_str(format!("1. **{}**\n", self.name).as_str());
+            s.push_str(format!("{}\n", self.desc).as_str());
+
+            if let Some(ab) = self.attack_bonus {
+                s.push_str(format!("*Attack Bonus:* {}  ", ab).as_str());
+            }
+            if let Some(ref dd) = self.damage_dice {
+                s.push_str(format!("*Damage Dice:* {}  ", dd).as_str());
+            }
+            if let Some(db) = self.damage_bonus {
+                s.push_str(format!("*Damage Bonus:* {}", db).as_str());
+            }
+            write!(f, "{}\n", s)
+        } else {
+            write!(f, "")
+        }
+    }
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -156,4 +180,63 @@ where
     D: Deserializer<'de>,
 {
     deserializer.deserialize_any(DeserializeStringIntoVecOfStringVisitor)
+}
+
+impl ToMarkdown for Monster {
+    fn to_md(&self) -> Markdown {
+        Markdown(format!(
+            "
+###Name:  {}
+**Race:** {}
+- **Armor Class** {}
+- **Hit Points** {}
+- **Hit Dice** {}
+
+|STR|DEX|CON|INT|WIS|CHA|
+|:---:|:---:|:---:|:---:|:---:|:---:|
+|{}|{}|{}|{}|{}|{}|
+|{:?}|{:?}|{:?}|{:?}|{:?}|{:?}|
+___
+- **Condition Immunities** {}
+- **Passive Perception** {:?}
+- **Languages** {}
+- **Challenge** {}
+
+**Spells:**
+{}
+
+**Actions:**
+{}
+",
+            self.name,
+            self.race,
+            self.armor_class,
+            self.hit_points,
+            self.hit_dice,
+            self.strength,
+            self.dexterity,
+            self.constitution,
+            self.intelligence,
+            self.wisdom,
+            self.charisma,
+            self.strength_save,
+            self.dexterity_save,
+            self.constitution_save,
+            self.intelligence_save,
+            self.wisdom_save,
+            self.charisma_save,
+            self.condition_immunities,
+            self.perception,
+            self.languages,
+            self.challenge_rating,
+            self.spell_list.join("\n"),
+            {
+                let mut sa = String::new();
+                self.actions
+                    .iter()
+                    .for_each(|f| sa.push_str(f.to_string().as_str()));
+                sa
+            }
+        ))
+    }
 }
