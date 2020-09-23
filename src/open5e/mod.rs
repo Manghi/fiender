@@ -22,5 +22,5 @@ pub mod spells;
 
 pub enum SearchType {
     Monster,
-    Spell
+    Spell,
 }

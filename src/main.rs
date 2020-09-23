@@ -37,33 +37,6 @@ struct EndPointResults<T> {
     previous: Option<String>,
     results: Vec<T>,
 }
-
-/*
-#[tokio::main]
-async fn main() -> Result<(), reqwest::Error> {
-
-    let mut base_url = "https://api.open5e.com/monsters/".to_owned();
-
-
-    let mut page_num = 1;
-    loop {
-        println!("Pages scanned: {}", page_num);
-
-        let res = reqwest::get(&base_url).await?;
-        let body = res.json::<EndPointResults<Monster>>().await?;
-
-        if let Some(next_page) = body.next  {
-            base_url = next_page;
-            page_num += 1;
-        } else {
-            break;
-        }
-    }
-
-    Ok(())
-}
-*/
-
 #[tokio::main]
 async fn main() -> Result<(), reqwest::Error> {
     let matches = App::new(env!("CARGO_PKG_NAME"))
@@ -116,12 +89,8 @@ async fn main() -> Result<(), reqwest::Error> {
     res.error_for_status_ref()?;
 
     let json_data = match search_type {
-        SearchType::Monster => {
-            res.json::<Monster>().await?.to_md()
-        }
-        SearchType::Spell => {
-            res.json::<Spell>().await?.to_md()
-        }
+        SearchType::Monster => res.json::<Monster>().await?.to_md(),
+        SearchType::Spell => res.json::<Spell>().await?.to_md(),
     };
 
     println!("{}", json_data);

@@ -17,8 +17,8 @@
  * this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-use serde::{Deserialize, Serialize};
 use crate::md::{Markdown, ToMarkdown};
+use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[allow(non_snake_case)]
@@ -48,20 +48,32 @@ pub struct Spell {
 
 impl ToMarkdown for Spell {
     fn to_md(&self) -> Markdown {
-        Markdown(String::from("
-###Name: {self.name}
-*Level {self.level} {self.archetype}*
+        Markdown(format!(
+            "
+###Name: {}
+*Level {}*
 ___
-- **Casting Time:** {self.casting_time} action
-- **Range:** {self.range} feet
-- **Components:** {self.components}
-- **Duration:** {self.duration}
+- **Casting Time:** {} action
+- **Range:** {} feet
+- **Components:** {}
+- **Duration:** {}
 
-{self.desc}
+{}
 
-- **School:** {self.school}
-- **Class:** {self.dnd_class}
-- **Archetype:** {self.archetype}
-"))
+- **School:** {}
+- **Class:** {}
+- **Archetype:** {}
+",
+            self.name,
+            self.level,
+            self.casting_time,
+            self.range,
+            self.components,
+            self.duration,
+            self.desc,
+            self.school,
+            self.dnd_class,
+            self.archetype,
+        ))
     }
 }
