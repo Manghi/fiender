@@ -1,5 +1,7 @@
 # Fiender
+
 [![Crate](https://img.shields.io/crates/v/fiender.svg)](https://crates.io/crates/fiender)
+
 Fiender is a CLI tool written in Rust and can be used to retreive DnD5e spells and monsters stats. The only backend currently supported is https://open5e.com/.
 
 ## Installation

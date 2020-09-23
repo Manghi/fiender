@@ -4,7 +4,10 @@ version = "0.2.0"
 authors = ["manghi <manghirs@gmail.com>"]
 edition = "2018"
 description = "A CLI tool to retreive DnD 5e spells and monsters stats"
+repository = "https://github.com/manghi/fiender"
+readme = "README.md"
 license-file = "LICENSE"
+keywords = ["dnd", "5e", "dungeons and dragons", "spells", "monsters"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 [dependencies]
